@@ -16,4 +16,4 @@ RUN chmod a+rx app.psgi
 WORKDIR /home/dancer2
 USER dancer2
 EXPOSE 3001
-CMD starman --listen 0.0.0.0:3001 app.psgi
+CMD starman --listen 0.0.0.0:3001 -E development app.psgi
