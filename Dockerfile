@@ -1,31 +1,19 @@
-FROM perl:latest
-MAINTAINER Florentin Raud flo@ngineered.co.uk
+FROM fedora:latest
+MAINTAINER Sangyong Gwak <imyaman@netscape.net>
 
-RUN apt-get update && \
-apt-get upgrade -y && \
-BUILD_PACKAGES="curl make gcc" && \
-apt-get -y install $BUILD_PACKAGES --no-install-recommends && \
-curl -L http://cpanmin.us | perl - Dancer2 && \
-apt-get remove --purge -y curl make gcc && \
-apt-get autoremove -y && \
-apt-get clean && \
-apt-get autoclean && \
-echo -n > /var/lib/apt/extended_states && \
-rm -rf /var/lib/apt/lists/* && \
-rm -rf /usr/share/man/?? && \
-rm -rf /usr/share/man/??_* && \
-rm -rf ~/.cpanm/*
+RUN yum install -y glibc-langpack-en glibc-langpack-ko dancer2 perl-Starman procps
+RUN yum clean all
+RUN groupadd -r dancer2 -g 500
+RUN useradd -u 500 -r -g dancer2 -d /home/dancer2 -m -s /sbin/nologin -c "Perl Dancer2" dancer2
 
-# Add git commands to allow container updating
-ADD ./pull /usr/bin/pull
-ADD ./push /usr/bin/push
-RUN chmod 755 /usr/bin/pull && chmod 755 /usr/bin/push
+# Setup workdir
+WORKDIR /home/dancer2
+COPY . .
+RUN chown -R dancer2:dancer2 *
+RUN chmod a+rx app.psgi
 
-# Plackup the git or local dancer app
-ADD ./start.sh /start.sh
-RUN chmod 755 /start.sh
-
-# Expose Ports
-EXPOSE 5000
-
-CMD ["/bin/bash", "/start.sh"]
+# run
+WORKDIR /home/dancer2
+USER dancer2
+EXPOSE 3001
+CMD starman --listen 0.0.0.0:3001 app.psgi

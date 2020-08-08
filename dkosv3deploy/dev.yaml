@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docker-perl-dancer2
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docker-perl-dancer2
+  template:
+    metadata:
+      labels:
+        app: docker-perl-dancer2
+    spec:
+      containers:
+      - image: idock.daumkakao.io/bravo-gwak/docker-perl-dancer2:latest
+        imagePullPolicy: Always
+        name: docker-perl-dancer2
+        resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: docker-perl-dancer2
+spec:
+  selector:
+    app: docker-perl-dancer2
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 3001
+    targetPort: 3001
+    nodePort: 30001
